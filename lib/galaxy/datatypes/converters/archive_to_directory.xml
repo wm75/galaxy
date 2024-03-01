@@ -1,0 +1,34 @@
+<tool id="CONVERTER_archive_to_directory" name="Unpack archive to directory" version="1.0.0" profile="21.09">
+    <!-- Don't use tar directly so we can verify safety of results - tar -xzf '$input1'; -->
+    <requirements>
+        <requirement type="package" version="23.1.4">galaxy-util</requirement>
+    </requirements>
+    <command><![CDATA[
+        cp '$metadata_json' galaxy.json &&
+        mkdir '$output1.files_path' &&
+        cd '$output1.files_path' &&
+        python -c "from galaxy.util.compression_utils import CompressedFile; CompressedFile('$input1').extract('.')"
+    ]]></command>
+    <configfiles>
+        <configfile name="metadata_json"><![CDATA[{
+    "output1": {
+        "name": "$input1.name unpacked to $__target_datatype__",
+        "ext": "$__target_datatype__"
+    }
+}]]></configfile>
+    </configfiles>
+    <inputs>
+        <param format="tar,zip" name="input1" type="data"/>
+    </inputs>
+    <outputs>
+        <data format="auto" name="output1"/>
+    </outputs>
+    <tests>
+        <test>
+            <param name="input1" ftype="tar" value="testdir1.tar"/>
+            <output name="output1" ftype="directory" value="testdir1.tar.directory"/>
+        </test>
+    </tests>
+    <help>
+    </help>
+</tool>
