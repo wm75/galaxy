@@ -1,0 +1,42 @@
+- id: ssh
+  version: 0
+  name: ssh file system connection
+  description: |
+    This template allows connecting to SSH servers.
+  configuration:
+    type: ssh
+    host: "{{ variables.host }}"
+    user: "{{ variables.user }}"
+    port: "{{ variables.port }}"
+    path: "{{ variables.path }}"
+    passwd: "{{ secrets.password }}"
+    writable: "{{ variables.writable }}"
+  variables:
+    host:
+      label: Host server
+      type: string
+      help: SSH Server to connect to.
+    user:
+      label: User
+      type: string
+      help: |
+        Username to connect with.
+    writable:
+      label: Writable?
+      type: boolean
+      help: Is this an SSH server you have permission to write to?
+    port:
+      label: Port
+      type: integer
+      help: Port used to connect to the SSH server.
+      default: 22
+    path:
+      label: Path
+      type: string
+      help: Path from which to expose file system (e.g. your user home directory on the server)
+  secrets:
+    password:
+      label: Password
+      help: |
+        Password to connect to SSH server with.
+

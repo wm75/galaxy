@@ -36,6 +36,7 @@ from galaxy.util.config_templates import (
     UserDetailsDict,
 )
 
+
 FileSourceTemplateType = Literal[
     "ftp",
     "posix",
@@ -49,6 +50,8 @@ FileSourceTemplateType = Literal[
     "inveniordm",
     "zenodo",
     "rspace",
+    "ssh",
+    "crypt4gh_via_ssh",
 ]
 
 
@@ -153,6 +156,52 @@ class FtpFileSourceConfiguration(StrictModel):
     port: int = 21
     user: Optional[str] = None
     passwd: Optional[str] = None
+    writable: bool = False
+
+
+class SshFileSourceTemplateConfiguration(StrictModel):
+    type: Literal["ssh"]
+    host: Union[str, TemplateExpansion]
+    port: Union[int, TemplateExpansion] = 22
+    user: Optional[Union[str, TemplateExpansion]] = None
+    passwd: Optional[Union[str, TemplateExpansion]] = None
+    path: Union[str, TemplateExpansion]
+    writable: Union[bool, TemplateExpansion] = False
+    template_start: Optional[str] = None
+    template_end: Optional[str] = None
+
+
+class Crypt4ghSshFileSourceTemplateConfiguration(StrictModel):
+    type: Literal["crypt4gh_via_ssh"]
+    host: Union[str, TemplateExpansion]
+    port: Union[int, TemplateExpansion] = 22
+    user: Union[str, TemplateExpansion]
+    passwd: Union[str, TemplateExpansion]
+    sec_key: Union[str, TemplateExpansion]
+    path: Union[str, TemplateExpansion]
+    writable: Union[bool, TemplateExpansion] = False
+    template_start: Optional[str] = None
+    template_end: Optional[str] = None
+
+
+class SshFileSourceConfiguration(StrictModel):
+    type: Literal["ssh"]
+    host: str
+    port: int = 22
+    user: Optional[str] = None
+    passwd: Optional[str] = None
+    path: str
+    writable: bool = False
+
+
+class Crypt4ghSshFileSourceConfiguration(StrictModel):
+    type: Literal["crypt4gh_via_ssh"]
+    host: str
+    port: int = 22
+    user: str
+    passwd: str
+    sec_key: str
+    path: str
     writable: bool = False
 
 
@@ -296,9 +345,12 @@ FileSourceTemplateConfiguration = Annotated[
         InvenioFileSourceTemplateConfiguration,
         ZenodoFileSourceTemplateConfiguration,
         RSpaceFileSourceTemplateConfiguration,
+        SshFileSourceTemplateConfiguration,
+        Crypt4ghSshFileSourceTemplateConfiguration,
     ],
     Field(discriminator="type"),
 ]
+
 
 FileSourceConfiguration = Annotated[
     Union[
@@ -314,6 +366,8 @@ FileSourceConfiguration = Annotated[
         InvenioFileSourceConfiguration,
         ZenodoFileSourceConfiguration,
         RSpaceFileSourceConfiguration,
+        SshFileSourceConfiguration,
+        Crypt4ghSshFileSourceConfiguration,
     ],
     Field(discriminator="type"),
 ]
@@ -379,6 +433,7 @@ def template_to_configuration(
 
 TypesToConfigurationClasses: Dict[FileSourceTemplateType, Type[FileSourceConfiguration]] = {
     "ftp": FtpFileSourceConfiguration,
+    "ssh": SshFileSourceConfiguration,
     "posix": PosixFileSourceConfiguration,
     "s3fs": S3FSFileSourceConfiguration,
     "azure": AzureFileSourceConfiguration,
@@ -386,10 +441,14 @@ TypesToConfigurationClasses: Dict[FileSourceTemplateType, Type[FileSourceConfigu
     "webdav": WebdavFileSourceConfiguration,
     "dropbox": DropboxFileSourceConfiguration,
     "googledrive": GoogleDriveFileSourceConfiguration,
+<<<<<<< HEAD
     "elabftw": eLabFTWFileSourceConfiguration,
     "inveniordm": InvenioFileSourceConfiguration,
     "zenodo": ZenodoFileSourceConfiguration,
     "rspace": RSpaceFileSourceConfiguration,
+=======
+    "crypt4gh_via_ssh": Crypt4ghSshFileSourceConfiguration,
+>>>>>>> 63a902aa2d (Add support for accessing EGA live outbox)
 }
 
 
