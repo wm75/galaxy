@@ -1,5 +1,10 @@
+import logging
+
+LOG = logging.getLogger(__name__)
+
 import base64
 import io
+import os
 from crypt4gh import keys
 from crypt4gh.lib import decrypt
 
@@ -41,15 +46,38 @@ class Crypt4ghViaSshFilesSource(SshFilesSource):
     ):
         with open(native_path, "wb") as write_file:
             props = self._serialization_props(user_context)
-            _ = props.pop("path")
+            path = props.pop("path")
+            LOG.debug(f"INFO: {source_path}, {native_path}, {props}")
             sec_key_data = io.BytesIO(base64.b64decode(props.pop("sec_key")))
-            assert sec_key_data.read(len(keys.ssh.MAGIC_WORD)) == keys.ssh.MAGIC_WORD
-            parsed_sec_key = keys.ssh.parse_private_key(sec_key_data, None)[0]
+            assert sec_key_data.read(len(keys.c4gh.MAGIC_WORD)) == keys.c4gh.MAGIC_WORD
+            parsed_sec_key = keys.c4gh.parse_private_key(sec_key_data, None)
+            LOG.debug(f"{source_path}, {native_path}, {parsed_sec_key}")
             file_path = source_path.split("://")[-1].split("/", 1)[1]
+            LOG.debug(f"{source_path}, {native_path}, {file_path}")
             decrypt(
                 [(0, parsed_sec_key, None)],
                 self._get_root_handle(props, opts)._sftp.open(file_path),
                 write_file
             )
+        LOG.debug(f"File size: {os.path.getsize(native_path)}")
+
+    def _resource_info_to_dict(self, dir_path, resource_info):
+        """Override to adjust filenames for display, removing the .c4gh suffix."""
+        name = resource_info.name
+        display_name = name[:-5] if name.endswith(".c4gh") else name
+        path = os.path.join(dir_path, name)
+        uri = self.uri_from_path(path)
+        if resource_info.is_dir:
+            return {"class": "Directory", "name": display_name, "uri": uri, "path": path}
+        else:
+            created = resource_info.created
+            return {
+                "class": "File",
+                "name": display_name,
+                "size": resource_info.size,
+                "ctime": self.to_dict_time(created),
+                "uri": uri,
+                "path": path,
+            }
 
 __all__ = ("Crypt4ghViaSshFilesSource",)
