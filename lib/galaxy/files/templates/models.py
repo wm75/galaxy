@@ -441,14 +441,11 @@ TypesToConfigurationClasses: Dict[FileSourceTemplateType, Type[FileSourceConfigu
     "webdav": WebdavFileSourceConfiguration,
     "dropbox": DropboxFileSourceConfiguration,
     "googledrive": GoogleDriveFileSourceConfiguration,
-<<<<<<< HEAD
     "elabftw": eLabFTWFileSourceConfiguration,
     "inveniordm": InvenioFileSourceConfiguration,
     "zenodo": ZenodoFileSourceConfiguration,
     "rspace": RSpaceFileSourceConfiguration,
-=======
     "crypt4gh_via_ssh": Crypt4ghSshFileSourceConfiguration,
->>>>>>> 63a902aa2d (Add support for accessing EGA live outbox)
 }
 
 
