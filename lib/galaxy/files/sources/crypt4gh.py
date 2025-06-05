@@ -54,11 +54,13 @@ class Crypt4ghViaSshFilesSource(SshFilesSource):
             LOG.debug(f"{source_path}, {native_path}, {parsed_sec_key}")
             file_path = source_path.split("://")[-1].split("/", 1)[1]
             LOG.debug(f"{source_path}, {native_path}, {file_path}")
-            decrypt(
-                [(0, parsed_sec_key, None)],
-                self._get_root_handle(props, opts)._sftp.open(file_path),
-                write_file
-            )
+            handle = self._get_root_handle(props, opts)
+            with handle._sftp.open(file_path) as read_file:
+                decrypt(
+                    [(0, parsed_sec_key, None)],
+                    read_file,
+                    write_file
+                )
         LOG.debug(f"File size: {os.path.getsize(native_path)}")
 
     def _resource_info_to_dict(self, dir_path, resource_info):
