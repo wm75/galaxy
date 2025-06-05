@@ -47,13 +47,10 @@ class Crypt4ghViaSshFilesSource(SshFilesSource):
         with open(native_path, "wb") as write_file:
             props = self._serialization_props(user_context)
             path = props.pop("path")
-            LOG.debug(f"INFO: {source_path}, {native_path}, {props}")
             sec_key_data = io.BytesIO(base64.b64decode(props.pop("sec_key")))
             assert sec_key_data.read(len(keys.c4gh.MAGIC_WORD)) == keys.c4gh.MAGIC_WORD
             parsed_sec_key = keys.c4gh.parse_private_key(sec_key_data, None)
-            LOG.debug(f"{source_path}, {native_path}, {parsed_sec_key}")
             file_path = source_path.split("://")[-1].split("/", 1)[1]
-            LOG.debug(f"{source_path}, {native_path}, {file_path}")
             handle = self._get_root_handle(props, opts)
             with handle._sftp.open(file_path) as read_file:
                 decrypt(
@@ -61,7 +58,6 @@ class Crypt4ghViaSshFilesSource(SshFilesSource):
                     read_file,
                     write_file
                 )
-        LOG.debug(f"File size: {os.path.getsize(native_path)}")
 
     def _resource_info_to_dict(self, dir_path, resource_info):
         """Override to adjust filenames for display, removing the .c4gh suffix."""
